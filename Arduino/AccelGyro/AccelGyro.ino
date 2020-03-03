@@ -1,129 +1,196 @@
-    const int xInput = A0;
-    const int yInput = A1;
-    const int zInput = A2;
-    const int buttonPin = 2;
+    // Basic demo for accelerometer & gyro readings from Adafruit
+    // LSM6DSOX sensor
      
-    // Raw Ranges:
-    // initialize to mid-range and allow calibration to
-    // find the minimum and maximum for each axis
-    int xRawMin = 512;
-    int xRawMax = 512;
+    #include <Adafruit_LSM6DSOX.h>
      
-    int yRawMin = 512;
-    int yRawMax = 512;
+    // For SPI mode, we need a CS pin
+    #define LSM_CS 10
+    // For software-SPI mode we need SCK/MOSI/MISO pins
+    #define LSM_SCK 13
+    #define LSM_MISO 12
+    #define LSM_MOSI 11
      
-    int zRawMin = 512;
-    int zRawMax = 512;
+    Adafruit_LSM6DSOX sox;
+    void setup(void) {
+      Serial.begin(115200);
+      while (!Serial)
+        delay(10); // will pause Zero, Leonardo, etc until serial console opens
      
-    // Take multiple samples to reduce noise
-    const int sampleSize = 10;
+      Serial.println("Adafruit LSM6DSOX test!");
      
-    void setup() 
-    {
-      analogReference(EXTERNAL);
-      Serial.begin(9600);
+      if (!sox.begin_I2C()) {
+        // if (!sox.begin_SPI(LSM_CS)) {
+        // if (!sox.begin_SPI(LSM_CS, LSM_SCK, LSM_MISO, LSM_MOSI)) {
+        // Serial.println("Failed to find LSM6DSOX chip");
+        while (1) {
+          delay(10);
+        }
+      }
+     
+      Serial.println("LSM6DSOX Found!");
+     
+      // sox.setAccelRange(LSM6DS_ACCEL_RANGE_2_G);
+      Serial.print("Accelerometer range set to: ");
+      switch (sox.getAccelRange()) {
+      case LSM6DS_ACCEL_RANGE_2_G:
+        Serial.println("+-2G");
+        break;
+      case LSM6DS_ACCEL_RANGE_4_G:
+        Serial.println("+-4G");
+        break;
+      case LSM6DS_ACCEL_RANGE_8_G:
+        Serial.println("+-8G");
+        break;
+      case LSM6DS_ACCEL_RANGE_16_G:
+        Serial.println("+-16G");
+        break;
+      }
+     
+      // sox.setGyroRange(LSM6DS_GYRO_RANGE_250_DPS );
+      Serial.print("Gyro range set to: ");
+      switch (sox.getGyroRange()) {
+      case LSM6DS_GYRO_RANGE_125_DPS:
+        Serial.println("125 degrees/s");
+        break;
+      case LSM6DS_GYRO_RANGE_250_DPS:
+        Serial.println("250 degrees/s");
+        break;
+      case LSM6DS_GYRO_RANGE_500_DPS:
+        Serial.println("500 degrees/s");
+        break;
+      case LSM6DS_GYRO_RANGE_1000_DPS:
+        Serial.println("1000 degrees/s");
+        break;
+      case LSM6DS_GYRO_RANGE_2000_DPS:
+        Serial.println("2000 degrees/s");
+        break;
+      case ISM330DHCT_GYRO_RANGE_4000_DPS:
+        break; // unsupported range for the DSOX
+      }
+     
+      // sox.setAccelDataRate(LSM6DS_RATE_12_5_HZ);
+      Serial.print("Accelerometer data rate set to: ");
+      switch (sox.getAccelDataRate()) {
+      case LSM6DS_RATE_SHUTDOWN:
+        Serial.println("0 Hz");
+        break;
+      case LSM6DS_RATE_12_5_HZ:
+        Serial.println("12.5 Hz");
+        break;
+      case LSM6DS_RATE_26_HZ:
+        Serial.println("26 Hz");
+        break;
+      case LSM6DS_RATE_52_HZ:
+        Serial.println("52 Hz");
+        break;
+      case LSM6DS_RATE_104_HZ:
+        Serial.println("104 Hz");
+        break;
+      case LSM6DS_RATE_208_HZ:
+        Serial.println("208 Hz");
+        break;
+      case LSM6DS_RATE_416_HZ:
+        Serial.println("416 Hz");
+        break;
+      case LSM6DS_RATE_833_HZ:
+        Serial.println("833 Hz");
+        break;
+      case LSM6DS_RATE_1_66K_HZ:
+        Serial.println("1.66 KHz");
+        break;
+      case LSM6DS_RATE_3_33K_HZ:
+        Serial.println("3.33 KHz");
+        break;
+      case LSM6DS_RATE_6_66K_HZ:
+        Serial.println("6.66 KHz");
+        break;
+      }
+     
+      // sox.setGyroDataRate(LSM6DS_RATE_12_5_HZ);
+      Serial.print("Gyro data rate set to: ");
+      switch (sox.getGyroDataRate()) {
+      case LSM6DS_RATE_SHUTDOWN:
+        Serial.println("0 Hz");
+        break;
+      case LSM6DS_RATE_12_5_HZ:
+        Serial.println("12.5 Hz");
+        break;
+      case LSM6DS_RATE_26_HZ:
+        Serial.println("26 Hz");
+        break;
+      case LSM6DS_RATE_52_HZ:
+        Serial.println("52 Hz");
+        break;
+      case LSM6DS_RATE_104_HZ:
+        Serial.println("104 Hz");
+        break;
+      case LSM6DS_RATE_208_HZ:
+        Serial.println("208 Hz");
+        break;
+      case LSM6DS_RATE_416_HZ:
+        Serial.println("416 Hz");
+        break;
+      case LSM6DS_RATE_833_HZ:
+        Serial.println("833 Hz");
+        break;
+      case LSM6DS_RATE_1_66K_HZ:
+        Serial.println("1.66 KHz");
+        break;
+      case LSM6DS_RATE_3_33K_HZ:
+        Serial.println("3.33 KHz");
+        break;
+      case LSM6DS_RATE_6_66K_HZ:
+        Serial.println("6.66 KHz");
+        break;
+      }
     }
      
-    void loop() 
-    {
-      int xRaw = ReadAxis(xInput);
-      int yRaw = ReadAxis(yInput);
-      int zRaw = ReadAxis(zInput);
-      
-      if (digitalRead(buttonPin) == LOW)
-      {
-        AutoCalibrate(xRaw, yRaw, zRaw);
-      }
-      else
-      {
-        Serial.print("Raw Ranges: X: ");
-        Serial.print(xRawMin);
-        Serial.print("-");
-        Serial.print(xRawMax);
-        
-        Serial.print(", Y: ");
-        Serial.print(yRawMin);
-        Serial.print("-");
-        Serial.print(yRawMax);
-        
-        Serial.print(", Z: ");
-        Serial.print(zRawMin);
-        Serial.print("-");
-        Serial.print(zRawMax);
-        Serial.println();
-        Serial.print(xRaw);
-        Serial.print(", ");
-        Serial.print(yRaw);
-        Serial.print(", ");
-        Serial.print(zRaw);
-        
-        // Convert raw values to 'milli-Gs"
-        long xScaled = map(xRaw, xRawMin, xRawMax, -1000, 1000);
-        long yScaled = map(yRaw, yRawMin, yRawMax, -1000, 1000);
-        long zScaled = map(zRaw, zRawMin, zRawMax, -1000, 1000);
-      
-        // re-scale to fractional Gs
-        float xAccel = xScaled / 1000.0;
-        float yAccel = yScaled / 1000.0;
-        float zAccel = zScaled / 1000.0;
-      
-        Serial.print(" :: ");
-        Serial.print(xAccel);
-        Serial.print("G, ");
-        Serial.print(yAccel);
-        Serial.print("G, ");
-        Serial.print(zAccel);
-        Serial.println("G");
-      
-      delay(500);
-      }
-    }
+    void loop() {
      
-    //
-    // Read "sampleSize" samples and report the average
-    //
-    int ReadAxis(int axisPin)
-    {
-      long reading = 0;
-      analogRead(axisPin);
-      delay(1);
-      for (int i = 0; i < sampleSize; i++)
-      {
-        reading += analogRead(axisPin);
-      }
-      return reading/sampleSize;
-    }
+      //  /* Get a new normalized sensor event */
+      sensors_event_t accel;
+      sensors_event_t gyro;
+      sensors_event_t temp;
+      sox.getEvent(&accel, &gyro, &temp);
      
-    //
-    // Find the extreme raw readings from each axis
-    //
-    void AutoCalibrate(int xRaw, int yRaw, int zRaw)
-    {
-      Serial.println("Calibrate");
-      if (xRaw < xRawMin)
-      {
-        xRawMin = xRaw;
-      }
-      if (xRaw > xRawMax)
-      {
-        xRawMax = xRaw;
-      }
-      
-      if (yRaw < yRawMin)
-      {
-        yRawMin = yRaw;
-      }
-      if (yRaw > yRawMax)
-      {
-        yRawMax = yRaw;
-      }
+      Serial.print("\t\tTemperature ");
+      Serial.print(temp.temperature);
+      Serial.println(" deg C");
      
-      if (zRaw < zRawMin)
-      {
-        zRawMin = zRaw;
-      }
-      if (zRaw > zRawMax)
-      {
-        zRawMax = zRaw;
-      }
+      /* Display the results (acceleration is measured in m/s^2) */
+      Serial.print("\t\tAccel X: ");
+      Serial.print(accel.acceleration.x);
+      Serial.print(" \tY: ");
+      Serial.print(accel.acceleration.y);
+      Serial.print(" \tZ: ");
+      Serial.print(accel.acceleration.z);
+      Serial.println(" m/s^2 ");
+     
+      /* Display the results (rotation is measured in rad/s) */
+      Serial.print("\t\tGyro X: ");
+      Serial.print(gyro.gyro.x);
+      Serial.print(" \tY: ");
+      Serial.print(gyro.gyro.y);
+      Serial.print(" \tZ: ");
+      Serial.print(gyro.gyro.z);
+      Serial.println(" radians/s ");
+      Serial.println();
+     
+      delay(100);
+     
+      //  // serial plotter friendly format
+     
+      //  Serial.print(temp.temperature);
+      //  Serial.print(",");
+     
+      //  Serial.print(accel.acceleration.x);
+      //  Serial.print(","); Serial.print(accel.acceleration.y);
+      //  Serial.print(","); Serial.print(accel.acceleration.z);
+      //  Serial.print(",");
+     
+      // Serial.print(gyro.gyro.x);
+      // Serial.print(","); Serial.print(gyro.gyro.y);
+      // Serial.print(","); Serial.print(gyro.gyro.z);
+      // Serial.println();
+      //  delayMicroseconds(10000);
     }
