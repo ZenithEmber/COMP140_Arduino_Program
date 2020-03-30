@@ -12,7 +12,7 @@
      
     Adafruit_LSM6DSOX sox;
     void setup(void) {
-      Serial.begin(115200);
+      Serial.begin(9600);
       while (!Serial)
         delay(10); // will pause Zero, Leonardo, etc until serial console opens
      
@@ -152,10 +152,7 @@
       sensors_event_t gyro;
       sensors_event_t temp;
       sox.getEvent(&accel, &gyro, &temp);
-     
-      Serial.print("\t\tTemperature ");
-      Serial.print(temp.temperature);
-      Serial.println(" deg C");
+
      
       /* Display the results (acceleration is measured in m/s^2) */
       Serial.print("\t\tAccel X: ");
