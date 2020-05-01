@@ -1,0 +1,7 @@
+#COMP140_Arduino_Program
+
+Libraries included:
+-Adafruit LSM6DS
+-Adafruit BusIO
+-Adafruit Unified Sensor
+
